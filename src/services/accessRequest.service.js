@@ -1,33 +1,32 @@
-const repo = require('../repositories/accessRequest.repository');
-const { v4: uuidv4 } = require('uuid');
+const repository = require('../repositories/accessRequest.repository');
 
 class AccessRequestService {
-    getAllRequests(query) {
-        let items = repo.findAll();
-        if (query.status) {
-            items = items.filter(i => i.status === query.status);
-        }
-        return items;
+    async getAllRequests(query) {
+        return await repository.findAll(query);
     }
-    createRequest(data) {
+
+    async createRequest(data) {
         const newRequest = {
-            id: uuidv4(),
-            userName: data.userName,
+            user_id: data.user_id,
             date: data.date,
-            accessType: data.accessType,
+            access_type: data.access_type || data.accessType, 
             comments: data.comments || "",
             status: "Pending"
         };
-        return repo.create(newRequest);
+        return await repository.create(newRequest);
     }
-    getById(id) {
-        return repo.findById(id);
+
+    async getById(id) {
+        return await repository.findById(id);
     }
-    updateRequest(id, data) {
-        return repo.update(id, data);
+
+    async updateRequest(id, data) {
+        return await repository.update(id, data);
     }
-    deleteRequest(id) {
-        return repo.delete(id);
+
+    async deleteRequest(id) {
+        return await repository.delete(id);
     }
 }
+
 module.exports = new AccessRequestService();

@@ -8,7 +8,7 @@ class CreateUserRequestDto {
 class UserResponseDto {
     constructor(user) {
         this.id = user.id;
-        this.userName = user.userName;
+        this.userName = user.name || user.userName;
     }
 }
 

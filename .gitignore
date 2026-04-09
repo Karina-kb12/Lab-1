@@ -1,1 +1,4 @@
 node_modules/
+src/data/*.db
+src/data/*.json
+node_modules/
