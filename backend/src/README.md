@@ -1,65 +1,73 @@
-Лабораторна робота No2: Розробка REST API для системи керування доступом
-Даний проект реалізує серверний додаток для керування заявками на доступ до об'єктів інфраструктури. API побудовано на Node.js з використанням Express та дотриманням архітектури багатошарового застосунку (Layered Architecture).
+Markdown
+# Лабораторна робота №3: Інтеграція SQLite та розробка багатошарового REST API
 
-Як запустити проект
-Встановлення залежностей:
-Переконайтеся, що ви знаходитесь у папці backend, та виконайте:
+Даний проект реалізує серверну частину системи керування доступом до лабораторій. У цій версії додано персистентне збереження даних у базу SQLite, реалізовано повний CRUD-цикл та централізовану обробку помилок.
 
-Bash
-npm install
-Запуск сервера:
+## 1. Порядок запуску проекту
+
+Для коректної роботи додатка виконайте наступні кроки:
+
+1. **Встановлення залежностей**:
+   Переконайтеся, що ви знаходитесь у папці проекту і виконайте:
+   ```bash
+   npm install
+Запуск сервера та ініціалізація БД:
+Виконайте команду:
 
 Bash
 node src/server.js
-Сервер працюватиме за адресою: http://localhost:3000
+При першому запуску додаток автоматично створить файл бази даних ./src/data/app.db, розгорне схему таблиць та наповнить їх тестовими даними (Seed).
 
-Реалізовані сутності (Варіант: Менеджер заявок)
-Проект реалізує повний CRUD-цикл для наступних сутностей:
+2. Опис схеми бази даних
+База даних SQLite містить 3 основні таблиці з наступними зв'язками та обмеженнями цілісності:
 
-Users — користувачі (Admin встановлений за замовчуванням).
+Таблиця Users (Користувачі)
+id: INTEGER (PRIMARY KEY, AUTOINCREMENT)
 
-AccessRequests — запити на доступ.
+name: TEXT (NOT NULL)
 
-Поля: id (UUID), userName, date, accessType, comments, status (за замовчуванням Pending).
+email: TEXT (UNIQUE, NOT NULL)
 
-Approvals — підтвердження або відхилення запитів.
+role: TEXT (CHECK (role IN ('Admin', 'Student')))
 
-Архітектура проекту
-Код структурований за функціональним призначенням:
+Таблиця AccessRequests (Заявки на доступ)
+id: INTEGER (PRIMARY KEY, AUTOINCREMENT)
 
-Routes — визначення маршрутів API.
+userId: INTEGER (FOREIGN KEY -> Users.id ON DELETE CASCADE)
 
-Controllers — обробка вхідних HTTP-запитів та валідація даних.
+resource: TEXT (NOT NULL) — Назва лабораторії
 
-Services — реалізація бізнес-логіки.
+status: TEXT (Default: 'Pending')
 
-Repositories — керування даними в оперативній пам'яті (In-memory storage).
+Таблиця Approvals (Рішення по доступу)
+id: INTEGER (PRIMARY KEY, AUTOINCREMENT)
 
-DTOs — об'єкти передачі даних.
+requestId: INTEGER (FOREIGN KEY -> AccessRequests.id)
 
-Middleware — логування запитів та централізована обробка помилок.
+adminId: INTEGER (FOREIGN KEY -> Users.id)
 
-Приклади запитів (curl)
-1. Отримання списку всіх запитів (GET)
+decision: TEXT (NOT NULL) — Approved/Rejected
+
+3. Приклади API-запитів (curl)
+Отримання списку користувачів (Фільтрація, Сортування та Ліміт)
+Демонстрація вимоги рівня «Добре»:
+
 Bash
-curl.exe http://localhost:3000/api/access-requests
-2. Створення нового запиту (POST)
+curl.exe "http://localhost:3000/api/users?sort=name&limit=5"
+Створення нової заявки (POST)
 Bash
-curl.exe -X POST http://localhost:3000/api/access-requests -H "Content-Type: application/json" -d "{\"userName\": \"Karyna\", \"date\": \"2026-03-19\", \"accessType\": \"Laboratory\"}"
-3. Оновлення запиту (PUT)
+curl.exe -X POST http://localhost:3000/api/access-requests -H "Content-Type: application/json" -d "{\"userId\": 2, \"resource\": \"Lab 404\"}"
+Видалення користувача (DELETE / Повний CRUD)
 Bash
-curl.exe -X PUT http://localhost:3000/api/access-requests/{UUID} -H "Content-Type: application/json" -d "{\"userName\": \"Karyna\", \"date\": \"2026-03-19\", \"accessType\": \"Laboratory\", \"status\": \"Approved\"}"
-4. Видалення запиту (DELETE)
+curl.exe -X DELETE http://localhost:3000/api/users/1
+Перевірка обробки помилок (404 Not Found)
 Bash
-curl.exe -X DELETE http://localhost:3000/api/access-requests/{UUID}
-Валідація та помилки
-Сервер перевіряє обов'язкові поля (userName, date, accessType). У разі помилки повертається статус 400 Bad Request:
+curl.exe http://localhost:3000/api/users/999
+4. Архітектура та особливості реалізації
+Layered Architecture: Проект розділений на шари (Routes -> Controllers -> Services -> Repositories).
 
-JSON
-{
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Missing required fields"
-  }
-}
-Також реалізовано обробку помилки 404 Not Found для неіснуючих ресурсів та 500 для внутрішніх помилок сервера.
+Централізована обробка помилок: Використовується Middleware в server.js, що повертає помилки у форматі JSON.
+
+Seed Data: При порожній базі автоматично додається 5 тестових користувачів.
+
+Обмеження: Згідно з вимогами лаби, ORM не використовується, запити виконуються через пряму конкатенацію (без плейсхолдерів для демонстрації архітектури).

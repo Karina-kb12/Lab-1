@@ -1,11 +1,17 @@
-const db = require('../db');
+const { all, run } = require('../db/dbClient');
+
 class ApprovalRepository {
-    findAll() {
-        return db.approvals;
+    async findAll() {
+        return await all("SELECT * FROM Approvals");
     }
-    create(data) {
-        db.approvals.push(data);
+
+    async create(data) {
+        const sql = `INSERT INTO Approvals (request_id, admin_id, decision_date) 
+                     VALUES (${data.requestId}, ${data.adminId}, '${new Date().toISOString()}')`;
+        const result = await run(sql);
+        data.id = result.lastID;
         return data;
     }
 }
+
 module.exports = new ApprovalRepository();

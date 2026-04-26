@@ -1,18 +1,29 @@
 const repo = require('../repositories/user.repository');
-const { v4: uuidv4 } = require('uuid');
+
 class UserService {
-    getAllUsers() {
-        return repo.findAll();
+    async getAllUsers(limit, sort, order) {
+        return await repo.findAll(limit, sort, order);
     }
-    getUserById(id) {
-        return repo.findById(id);
+
+    async getUserById(id) {
+        return await repo.findById(id);
     }
-    createUser(data) {
+
+    async createUser(data) {
         const newUser = {
-            id: uuidv4(),
-            userName: data.userName.trim()
+            userName: data.userName.trim(),
+            email: data.email
         };
-        return repo.create(newUser);
+        return await repo.create(newUser);
+    }
+
+    async updateUser(id, data) {
+        return await repo.update(id, data);
+    }
+
+    async deleteUser(id) {
+        return await repo.delete(id);
     }
 }
+
 module.exports = new UserService();
