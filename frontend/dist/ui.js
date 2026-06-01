@@ -15,18 +15,34 @@ export function renderRequests(requests) {
     emptyState.classList.add("hidden");
     requests.forEach(req => {
         const row = document.createElement("tr");
-        const displayName = req.user_name || `Користувач #${req.user_id}`;
+        const displayName = req.userName || `Користувач #${req.id}`;
         const displayDate = req.date ? new Date(req.date).toLocaleString('uk-UA') : "—";
         const displayComments = req.comments || "—";
-        row.innerHTML = `
-            <td>${req.id}</td>
-            <td>${displayName}</td>
-            <td>${displayDate}</td>
-            <td>${req.access_type}</td>
-            <td>${displayComments}</td>
-            <td>${req.status}</td>
-            <td><button class="delete-btn" data-id="${req.id}">Видалити</button></td>
-        `;
+        const tdId = document.createElement("td");
+        const tdName = document.createElement("td");
+        const tdDate = document.createElement("td");
+        const tdType = document.createElement("td");
+        const tdComments = document.createElement("td");
+        const tdStatus = document.createElement("td");
+        const tdAction = document.createElement("td");
+        tdId.textContent = String(req.id);
+        tdName.textContent = displayName;
+        tdDate.textContent = displayDate;
+        tdType.textContent = req.accessType;
+        tdComments.textContent = displayComments;
+        tdStatus.textContent = req.status;
+        const btn = document.createElement("button");
+        btn.className = "delete-btn";
+        btn.textContent = "Видалити";
+        btn.setAttribute("data-id", String(req.id));
+        tdAction.appendChild(btn);
+        row.appendChild(tdId);
+        row.appendChild(tdName);
+        row.appendChild(tdDate);
+        row.appendChild(tdType);
+        row.appendChild(tdComments);
+        row.appendChild(tdStatus);
+        row.appendChild(tdAction);
         tableBody.appendChild(row);
     });
 }

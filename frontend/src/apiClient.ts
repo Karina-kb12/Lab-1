@@ -7,9 +7,20 @@ async function request<T>(path: string, options: RequestInit = {}, timeoutMs = 1
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
+    const token = localStorage.getItem('token');
+    const headers: Record<string, string> = {
+        ...(options.headers as Record<string, string>),
+        "Content-Type": "application/json"
+    };
+
+    if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+    }
+
     try {
         const response = await fetch(url, {
             ...options,
+            headers,
             signal: controller.signal
         });
 
@@ -22,9 +33,8 @@ async function request<T>(path: string, options: RequestInit = {}, timeoutMs = 1
             try { payload = JSON.parse(rawText); } catch {}
             
             const err: ApiError = {
-                status: response.status,
-                message: payload?.title ?? payload?.message ?? "HTTP помилка",
-                details: payload?.detail ?? rawText ?? `Статус: ${response.status}`
+                code: response.status,
+                message: payload?.message ?? payload?.title ?? "HTTP помилка"
             };
             throw err;
         }
@@ -33,12 +43,12 @@ async function request<T>(path: string, options: RequestInit = {}, timeoutMs = 1
 
     } catch (e: any) {
         if (e.name === "AbortError") {
-            throw { status: 0, message: "Таймаут", details: "Сервер не відповів вчасно" } as ApiError;
+            throw { code: 0, message: "Таймаут", details: "Сервер не відповів вчасно" } as ApiError;
         }
-        if (e.status) throw e; 
+        if (e.code) throw e; 
         
         throw { 
-            status: 0, 
+            code: 0, 
             message: "Помилка мережі або CORS", 
             details: e?.message ?? String(e) 
         } as ApiError;
@@ -54,11 +64,10 @@ export async function getRequests(): Promise<AccessRequestDto[]> {
 export async function createRequest(dto: CreateAccessRequestDto): Promise<AccessRequestDto> {
     return await request<AccessRequestDto>("/access-requests", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dto)
     });
 }
 
 export async function deleteRequest(id: number): Promise<void> {
-    await request<void>(`/access-requests/${id}`, { method: "DELETE" });
+    return await request<void>(`/access-requests/${id}`, { method: "DELETE" });
 }

@@ -16,16 +16,16 @@ document.addEventListener("DOMContentLoaded", () => {
         const commentsInput = document.querySelector("#commentsInput") as HTMLTextAreaElement;
         const statusSelect = document.querySelector("#statusSelect") as HTMLSelectElement;
 
-        const dto = {
-            user_id: 1, 
-            user_name: (document.querySelector("#userNameInput") as HTMLInputElement).value.trim(),
+        const dto: CreateAccessRequestDto = {
+            userId: 0, // Додаємо заглушку для TypeScript, бекенд її ігнорує
+            userName: (document.querySelector("#userNameInput") as HTMLInputElement).value.trim(),
             date: (document.querySelector("#dateInput") as HTMLInputElement).value,
-            access_type: (document.querySelector("#accessTypeSelect") as HTMLSelectElement).value,
+            accessType: (document.querySelector("#accessTypeSelect") as HTMLSelectElement).value,
             comments: (document.querySelector("#commentsInput") as HTMLTextAreaElement).value,
             status: (document.querySelector("#statusSelect") as HTMLSelectElement).value
         };
 
-        if (!dto.user_name || !dto.date) {
+        if (!dto.userName || !dto.date) {
             alert("Будь ласка, заповніть ім'я та дату!");
             return;
         }

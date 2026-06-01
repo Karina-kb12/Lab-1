@@ -3,9 +3,18 @@ async function request(path, options = {}, timeoutMs = 10000) {
     const url = `${API_BASE_URL}${path}`;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    const token = localStorage.getItem('token');
+    const headers = {
+        ...options.headers,
+        "Content-Type": "application/json"
+    };
+    if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+    }
     try {
         const response = await fetch(url, {
             ...options,
+            headers,
             signal: controller.signal
         });
         if (response.status === 204)
@@ -18,9 +27,8 @@ async function request(path, options = {}, timeoutMs = 10000) {
             }
             catch { }
             const err = {
-                status: response.status,
-                message: payload?.title ?? payload?.message ?? "HTTP помилка",
-                details: payload?.detail ?? rawText ?? `Статус: ${response.status}`
+                code: response.status,
+                message: payload?.message ?? payload?.title ?? "HTTP помилка"
             };
             throw err;
         }
@@ -28,12 +36,12 @@ async function request(path, options = {}, timeoutMs = 10000) {
     }
     catch (e) {
         if (e.name === "AbortError") {
-            throw { status: 0, message: "Таймаут", details: "Сервер не відповів вчасно" };
+            throw { code: 0, message: "Таймаут", details: "Сервер не відповів вчасно" };
         }
-        if (e.status)
+        if (e.code)
             throw e;
         throw {
-            status: 0,
+            code: 0,
             message: "Помилка мережі або CORS",
             details: e?.message ?? String(e)
         };
@@ -48,10 +56,9 @@ export async function getRequests() {
 export async function createRequest(dto) {
     return await request("/access-requests", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dto)
     });
 }
 export async function deleteRequest(id) {
-    await request(`/access-requests/${id}`, { method: "DELETE" });
+    return await request(`/access-requests/${id}`, { method: "DELETE" });
 }
