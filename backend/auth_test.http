@@ -1,0 +1,36 @@
+### 1. Спроба входу з НЕВІРНИМИ обліковими даними (Перевірка безпеки)
+POST http://localhost:3000/api/v1/auth/login
+Content-Type: application/json
+
+{
+    "userName": "Karina",
+    "password": "wrong_password"
+}
+
+### Очікуваний результат: Статус 401 Unauthorized та повідомлення "Невірні облікові дані"
+
+
+### 2. Успішний вхід у систему (Отримання JWT-токуну)
+POST http://localhost:3000/api/v1/auth/login
+Content-Type: application/json
+
+{
+    "userName": "Karina",
+    "password": "password123"
+}
+
+### Очікуваний результат: Статус 200 OK та JSON, у якому прийде довгий рядок токену "token": "eyJhbGciOi..."
+### СКОПІЮЙ ОТРЫМАНИЙ ТОКЕН ДЛЯ НАСТУПНОГО ЗАПИТУ!
+
+
+### 3. Запит захищених даних з валідним токеном (Захист від IDOR)
+GET http://localhost:3000/api/v1/access-requests
+Authorization: Bearer <ВСТАВ_СЮДИ_СКОПІЙОВАНИЙ_ТОКЕН>
+
+### Очікуваний результат: Статус 200 OK та виведення твоїх заявок з бази даних
+
+
+### 4. Запит захищених даних БЕЗ токену або з невалідним (Перевірка захисту)
+GET http://localhost:3000/api/v1/access-requests
+
+### Очікуваний результат: Статус 401 Unauthorized та повідомлення "Неавторизований: відсутній токен"
