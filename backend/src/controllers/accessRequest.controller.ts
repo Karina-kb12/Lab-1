@@ -35,15 +35,21 @@ class AccessRequestController {
     }
 
     async create(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try {
-            const currentUserId = (req as any).userId;
-            const bodyWithUser = { ...req.body, userId: currentUserId };
-            
-            const dto = new CreateAccessRequestDto(bodyWithUser);
-            const newRequest = await accessRequestService.createRequest(dto);
+    try {
+        const currentUserId = (req as any).userId;
+        
+        const bodyWithUser = { 
+            ...req.body, 
+            userId: currentUserId,
+            user_id: currentUserId,
+            user_name: req.body.userName || req.body.user_name
+        };
+        
+        const dto = new CreateAccessRequestDto(bodyWithUser);
+        const newRequest = await accessRequestService.createRequest(dto);
             res.status(201).json(new AccessRequestResponseDto(newRequest));
         } catch (error: any) {
-            next(error);
+        next(error);
         }
     }
 

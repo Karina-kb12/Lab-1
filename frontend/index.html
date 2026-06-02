@@ -22,19 +22,19 @@
       <form id="createForm">
         <div class="field">
           <label for="userNameInput">Ім'я користувача</label>
-          <input id="userNameInput" type="text" placeholder="Напр., Іванов Іван" />
+          <input id="userNameInput" type="text" placeholder="Напр., Іванов Іван" required />
           <p class="error-text" id="userNameError"></p>
         </div>
 
         <div class="field">
           <label for="dateInput">Дата доступу</label>
-          <input id="dateInput" type="datetime-local" />
+          <input id="dateInput" type="datetime-local" required />
           <p class="error-text" id="dateError"></p>
         </div>
 
         <div class="field">
           <label for="accessTypeSelect">Тип доступу</label>
-          <select id="accessTypeSelect">
+          <select id="accessTypeSelect" required>
             <option value="">Оберіть тип доступу</option>
             <option value="Temporary">Тимчасовий</option>
             <option value="Permanent">Постійний</option>
@@ -45,16 +45,16 @@
 
         <div class="field">
           <label for="commentsInput">Коментар</label>
-          <textarea id="commentsInput" rows="4" placeholder="Опишіть причину запиту"></textarea>
+          <textarea id="commentsInput" rows="4" placeholder="Опишіть причину запиту" required></textarea>
           <p class="error-text" id="commentsError"></p>
         </div>
 
         <div class="field">
           <label for="statusSelect">Статус</label>
-          <select id="statusSelect">
-            <option value="Pending" selected>Pending</option>
-            <option value="Approved">Approved</option>
-            <option value="Rejected">Rejected</option>
+          <select id="statusSelect" required>
+            <option value="Pending" selected>В очікуванні</option>
+            <option value="Approved">Схвалено</option>
+            <option value="Rejected">Відхилено</option>
           </select>
           <p class="error-text" id="statusError"></p>
         </div>
@@ -74,9 +74,9 @@
         <input id="searchInput" type="text" placeholder="Пошук за іменем..." />
         <select id="filterStatus">
           <option value="">Усі статуси</option>
-          <option value="Pending">Pending</option>
-          <option value="Approved">Approved</option>
-          <option value="Rejected">Rejected</option>
+          <option value="Pending">В очікуванні</option>
+          <option value="Approved">Схвалено</option>
+          <option value="Rejected">Відхилено</option>
         </select>
         <select id="sortOrder">
           <option value="">Сортування</option>
@@ -87,21 +87,23 @@
 
       <p id="emptyState">Заявок поки немає. Додайте першу!</p>
 
-      <table id="itemsTable" class="hidden">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Ім'я користувача</th>
-            <th>Дата доступу</th>
-            <th>Тип доступу</th>
-            <th>Коментар</th>
-            <th>Статус</th>
-            <th>Дії</th>
-          </tr>
-        </thead>
-        <tbody id="itemsTableBody">
-        </tbody>
-      </table>
+      <div class="table-wrapper">
+        <table id="itemsTable" class="hidden">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Ім'я користувача</th>
+              <th>Дата доступу</th>
+              <th>Тип доступу</th>
+              <th>Коментар</th>
+              <th>Статус</th>
+              <th>Дії</th>
+            </tr>
+          </thead>
+          <tbody id="itemsTableBody">
+          </tbody>
+        </table>
+      </div>
     </section>
   </main>
 </body>

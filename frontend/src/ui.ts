@@ -1,26 +1,74 @@
 import { getRequests, deleteRequest } from "./apiClient.js";
-import type { AccessRequestDto, ApiError } from "./dtos.js";
+import type { AccessRequestDto } from "./dtos.js";
 
 const table = document.querySelector("#itemsTable") as HTMLTableElement;
 const tableBody = document.querySelector("#itemsTableBody") as HTMLTableSectionElement;
 const emptyState = document.querySelector("#emptyState") as HTMLParagraphElement;
 
-export function renderRequests(requests: AccessRequestDto[]) {
+let allRequests: AccessRequestDto[] = [];
+
+const statusTranslations: Record<string, string> = {
+    "Pending": "В очікуванні",
+    "Approved": "Схвалено",
+    "Rejected": "Відхилено",
+    "В очікуванні": "В очікуванні",
+    "Схвалено": "Схвалено",
+    "Відхилено": "Відхилено"
+};
+
+const accessTypeTranslations: Record<string, string> = {
+    "Temporary": "Тимчасовий",
+    "Permanent": "Постійний",
+    "Guest": "Гостьовий",
+    "Тимчасовий": "Тимчасовий",
+    "Постійний": "Постійний",
+    "Гостьовий": "Гостьовий"
+};
+
+export function applyFiltersAndRender() {
+    const searchInput = document.querySelector("#searchInput") as HTMLInputElement;
+    const filterStatus = document.querySelector("#filterStatus") as HTMLSelectElement;
+    const sortOrder = document.querySelector("#sortOrder") as HTMLSelectElement;
+
+    let filtered = [...allRequests];
+
+    if (searchInput && searchInput.value.trim() !== "") {
+        const query = searchInput.value.toLowerCase().trim();
+        filtered = filtered.filter(req => req.userName?.toLowerCase().includes(query));
+    }
+
+    if (filterStatus && filterStatus.value !== "") {
+        filtered = filtered.filter(req => req.status === filterStatus.value);
+    }
+
+    if (sortOrder && sortOrder.value !== "") {
+        filtered.sort((a, b) => {
+            const dateA = new Date(a.date).getTime();
+            const dateB = new Date(b.date).getTime();
+            return sortOrder.value === "date-asc" ? dateA - dateB : dateB - dateA;
+        });
+    }
+
     if (!tableBody) return;
     tableBody.innerHTML = "";
-    if (requests.length === 0) {
+
+    if (filtered.length === 0) {
         table.classList.add("hidden");
         emptyState.classList.remove("hidden");
         return;
     }
+
     table.classList.remove("hidden");
     emptyState.classList.add("hidden");
-    requests.forEach(req => {
+
+    filtered.forEach(req => {
         const row = document.createElement("tr");
         
         const displayName = req.userName || `Користувач #${req.id}`;
         const displayDate = req.date ? new Date(req.date).toLocaleString('uk-UA') : "—";
         const displayComments = req.comments || "—";
+        const displayType = accessTypeTranslations[req.accessType] || req.accessType;
+        const displayStatus = statusTranslations[req.status] || req.status;
         
         const tdId = document.createElement("td");
         const tdName = document.createElement("td");
@@ -33,9 +81,9 @@ export function renderRequests(requests: AccessRequestDto[]) {
         tdId.textContent = String(req.id);
         tdName.textContent = displayName;
         tdDate.textContent = displayDate;
-        tdType.textContent = req.accessType;
+        tdType.textContent = displayType;
         tdComments.textContent = displayComments;
-        tdStatus.textContent = req.status;
+        tdStatus.textContent = displayStatus;
         
         const btn = document.createElement("button");
         btn.className = "delete-btn";
@@ -56,8 +104,8 @@ export function renderRequests(requests: AccessRequestDto[]) {
 
 export async function refreshData() {
     try {
-        const data = await getRequests();
-        renderRequests(data);
+        allRequests = await getRequests();
+        applyFiltersAndRender();
     } catch (err: any) {
         console.error("Помилка завантаження:", err);
         alert("Не вдалося оновити дані");

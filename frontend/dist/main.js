@@ -1,8 +1,14 @@
-import { refreshData } from "./ui.js";
+import { refreshData, applyFiltersAndRender } from "./ui.js";
 import { createRequest } from "./apiClient.js";
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.querySelector("#createForm");
     refreshData();
+    const searchInput = document.querySelector("#searchInput");
+    const filterStatus = document.querySelector("#filterStatus");
+    const sortOrder = document.querySelector("#sortOrder");
+    searchInput?.addEventListener("input", () => applyFiltersAndRender());
+    filterStatus?.addEventListener("change", () => applyFiltersAndRender());
+    sortOrder?.addEventListener("change", () => applyFiltersAndRender());
     form?.addEventListener("submit", async (e) => {
         e.preventDefault();
         const userNameInput = document.querySelector("#userNameInput");
@@ -11,15 +17,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const commentsInput = document.querySelector("#commentsInput");
         const statusSelect = document.querySelector("#statusSelect");
         const dto = {
-            userId: 0, // Додаємо заглушку для TypeScript, бекенд її ігнорує
-            userName: document.querySelector("#userNameInput").value.trim(),
-            date: document.querySelector("#dateInput").value,
-            accessType: document.querySelector("#accessTypeSelect").value,
-            comments: document.querySelector("#commentsInput").value,
-            status: document.querySelector("#statusSelect").value
+            userId: 0,
+            userName: userNameInput.value.trim(),
+            date: dateInput.value,
+            accessType: accessTypeSelect.value,
+            status: statusSelect.value,
+            comments: commentsInput.value.trim()
         };
-        if (!dto.userName || !dto.date) {
-            alert("Будь ласка, заповніть ім'я та дату!");
+        if (!dto.userName || !dto.date || !dto.accessType || !dto.comments || !dto.status) {
+            alert("Будь ласка, заповніть абсолютно всі поля!");
             return;
         }
         try {
